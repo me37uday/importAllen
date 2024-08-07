@@ -1,17 +1,34 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # abc_atlas_to_seurat
 
-Guys!
+<!-- badges: start -->
 
-Let's start creating this function shall we?
+<!-- badges: end -->
 
-Let's work on human brain first and eventually scale it to mouse.
+The goal of abc_atlas_to_seurat is to …
 
-So human brain data is basically split into two files - neuronal and non-neuronal
+What is special about using `README.Rmd` instead of just `README.md`?
+You can include R chunks like so:
 
-Let's begin with neuronal.
+``` r
+summary(cars)
+#>      speed           dist       
+#>  Min.   : 4.0   Min.   :  2.00  
+#>  1st Qu.:12.0   1st Qu.: 26.00  
+#>  Median :15.0   Median : 36.00  
+#>  Mean   :15.4   Mean   : 42.98  
+#>  3rd Qu.:19.0   3rd Qu.: 56.00  
+#>  Max.   :25.0   Max.   :120.00
+```
 
-Can we start off by doing something like :
+You’ll still need to render `README.Rmd` regularly, to keep `README.md`
+up-to-date.
 
-abc_atlas_to_seurat --human --neuronal
+You can also embed plots, for example:
 
-Upon running this, the script should be able to see, if the neuronal.h5ad file already exists in the current working directory if not it should skip to downloading it by running the abc script that I am trying to update!!
+![](README_files/figure-gfm/pressure-1.png)<!-- -->
+
+In that case, don’t forget to commit and push the resulting figure
+files, so they display on GitHub.
