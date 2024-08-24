@@ -5,64 +5,94 @@
 #' @return A list containing cell metadata and gene data.
 #' @export
 load_data <- function(download_base = '../../abc_download_root') {
-  library(reticulate)
-  
-  setup_environment()
-  
-  # Convert the R path to a Python path
-  py_download_base <- import("pathlib")$Path(download_base)
-  
-  # Import necessary Python modules
-  pandas <- import("pandas")
-  anndata <- import("anndata")
-  AbcProjectCache <- import("abc_atlas_access.abc_atlas_cache.abc_project_cache")$AbcProjectCache
-  get_gene_data <- import("abc_atlas_access.abc_atlas_cache.anndata_utils")$get_gene_data
-  py <- import_builtins()
-  
-  # Create the cache object
-  abc_cache <- AbcProjectCache$from_s3_cache(py_download_base)
-  
-  # Load the cell metadata
-  cell <- abc_cache$get_metadata_dataframe(directory = 'WHB-10Xv3', file_name = 'cell_metadata', dtype = dict(cell_label = 'str'))
-  
-  # Ensure cell is a pandas DataFrame before calling set_index
-  if (py$isinstance(cell, pandas$DataFrame)) {
-    cell$set_index('cell_label', inplace = TRUE)
-    cat("Number of cells =", cell$shape[0], "\n")
-  } else {
-    cat("cell is not a pandas DataFrame. Its type is:", class(cell), "\n")
-    stop("cell is not a pandas DataFrame")
-  }
-  
-  # Load the cluster membership metadata and combine the data with the cell data
-  membership <- abc_cache$get_metadata_dataframe(directory = 'WHB-taxonomy', file_name = 'cluster_to_cluster_annotation_membership')
-  term_sets <- abc_cache$get_metadata_dataframe(directory = 'WHB-taxonomy', file_name = 'cluster_annotation_term_set')$set_index('label')
-  cluster_details <- membership$groupby(list('cluster_alias', 'cluster_annotation_term_set_name'))[['cluster_annotation_term_name']]$first()$unstack()
-  cluster_details <- cluster_details[term_sets[['name']]]  # order columns
-  cluster_details$fillna('Other', inplace = TRUE)
-  
-  cluster_details$sort_values(list('supercluster', 'cluster', 'subcluster'), inplace = TRUE)
-  cluster_colors <- membership$groupby(list('cluster_alias', 'cluster_annotation_term_set_name'))[['color_hex_triplet']]$first()$unstack()
-  cluster_colors <- cluster_colors[term_sets[['name']]]
-  cluster_colors$sort_values(list('supercluster', 'cluster', 'subcluster'), inplace = TRUE)
-  
-  roi <- abc_cache$get_metadata_dataframe(directory = 'WHB-10Xv3', file_name = 'region_of_interest_structure_map')
-  roi$set_index('region_of_interest_label', inplace = TRUE)
-  roi$rename(columns = dict(color_hex_triplet = 'region_of_interest_color'), inplace = TRUE)
-  
-  # Combine data
-  cell_extended <- cell$join(cluster_details, on = 'cluster_alias')
-  cell_extended <- cell_extended$join(cluster_colors, on = 'cluster_alias', rsuffix = '_color')
-  cell_extended <- cell_extended$join(roi[['region_of_interest_color']], on = 'region_of_interest_label')
-  
-  # Load gene data
-  gene <- abc_cache$get_metadata_dataframe(directory = 'WHB-10Xv3', file_name = 'gene')
-  gene$set_index('gene_identifier', inplace = TRUE)
-  cat("Number of genes =", gene$shape[0], "\n")
-  
-  # Convert cell_extended and gene to R data frames
-  cell_extended_r <- py_to_r(cell_extended)
-  gene_r <- py_to_r(gene)
-  
-  return(list(cell_metadata = cell_extended_r, gene_data = gene_r))
+    library(reticulate)
+
+    setup_environment()
+    print("finished setting up environment")
+    # Convert the R path to a Python path
+    py_download_base <- import("pathlib")$Path(download_base)
+
+    # Import necessary Python modules
+    pandas <- import("pandas")
+    anndata <- import("anndata")
+    AbcProjectCache <- import("abc_atlas_access.abc_atlas_cache.abc_project_cache")$AbcProjectCache
+    get_gene_data <- import("abc_atlas_access.abc_atlas_cache.anndata_utils")$get_gene_data
+    py <- import_builtins()
+
+    print("finished importing")
+
+    # Create the cache object
+    abc_cache <- AbcProjectCache$from_s3_cache(py_download_base)
+
+    print("finished creating cache")
+
+    # Load the cell metadata
+    cell <- abc_cache$get_metadata_dataframe(directory = 'WHB-10Xv3', file_name = 'cell_metadata', dtype = dict(cell_label = 'str'))
+
+    print("finished loading cell metadata")
+    # Set the index of the cell data frame
+    rownames(cell) <- cell$cell_label
+    cell$cell_label <- NULL
+    cat("Number of cells = ", nrow(cell), "\n")
+
+    # Load the cluster membership metadata and combine the data with the cell data.
+    membership <- abc_cache$get_metadata_dataframe(
+    directory='WHB-taxonomy',
+    file_name='cluster_to_cluster_annotation_membership'
+    )
+
+    term_sets <- abc_cache$get_metadata_dataframe(directory='WHB-taxonomy', file_name='cluster_annotation_term_set')
+    
+    rownames(term_sets) <- term_sets$label
+
+    cluster_details <- aggregate(cluster_annotation_term_name ~ cluster_alias + cluster_annotation_term_set_name, 
+                                data = membership, FUN = function(x) x[1])
+    cluster_details <- reshape(cluster_details, 
+                            idvar = "cluster_alias", 
+                            timevar = "cluster_annotation_term_set_name", 
+                            direction = "wide")
+    colnames(cluster_details) <- gsub("cluster_annotation_term_name.", "", colnames(cluster_details))
+    cluster_details <- cluster_details[, term_sets$name] # order columns
+    cluster_details[is.na(cluster_details)] <- 'Other'
+
+    # Sort values
+    cluster_details <- cluster_details[order(cluster_details$supercluster, cluster_details$cluster, cluster_details$subcluster), ]
+
+    cluster_colors <- aggregate(color_hex_triplet ~ cluster_alias + cluster_annotation_term_set_name, 
+                                data = membership, FUN = function(x) x[1])
+    cluster_colors <- reshape(cluster_colors, 
+                            idvar = "cluster_alias", 
+                            timevar = "cluster_annotation_term_set_name", 
+                            direction = "wide")
+
+    
+    colnames(cluster_colors) <- gsub("color_hex_triplet.", "", colnames(cluster_colors))
+    cluster_colors <- cluster_colors[, term_sets$name] # order columns
+    cluster_colors <- cluster_colors[order(cluster_colors$supercluster, cluster_colors$cluster, cluster_colors$subcluster), ]
+    roi <- abc_cache$get_metadata_dataframe(directory='WHB-10Xv3', file_name='region_of_interest_structure_map')
+    #ERROR IS HERE
+    rownames(roi) <- roi$region_of_interest_label
+    roi <- roi[, c('region_of_interest_color' = 'color_hex_triplet')]
+
+    # Remove unnecessary objects
+    rm(membership, term_sets)
+
+    # Combine data
+    cell_extended <- merge(cell, cluster_details, by.x = 'cluster_alias', by.y = 'cluster_alias', all.x = TRUE)
+    cell_extended <- merge(cell_extended, cluster_colors, by.x = 'cluster_alias', by.y = 'cluster_alias', suffixes = c("", "_color"), all.x = TRUE)
+    cell_extended <- merge(cell_extended, roi['region_of_interest_color'], by.x = 'region_of_interest_label', by.y = 'region_of_interest_label', all.x = TRUE)
+
+    # Remove unnecessary objects
+    rm(cluster_details, cluster_colors, roi)
+
+    head(cell_extended, 5)
+
+    # Gene data
+
+    gene <- abc_cache$get_metadata_dataframe(directory='WHB-10Xv3', file_name='gene')
+    rownames(gene) <- gene$gene_identifier
+    cat("Number of genes = ", nrow(gene), "\n")
+    head(gene, 5)
+
+    return (list(cell_metadata = cell_extended, gene_data = gene))
 }

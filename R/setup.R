@@ -5,17 +5,14 @@
 setup_environment <- function() {
   library(reticulate)
   
-  # Specify the exact path to Python 3.10
-  python_path <- "/home/fedo/miniforge3/bin/python3.10"
+  # Attempt to find Python 3.10 in the system path
+  python_path <- Sys.which("python3.10")
   
-  # Check if the specified Python path exists
-  if (!file.exists(python_path)) {
-    stop("Python 3.10 not found at the specified path. Please check the path and ensure it is correct.")
+  # Check if Python 3.10 was found
+  if (python_path == "") {
+    stop("Python 3.10 not found in the system PATH. Please ensure Python 3.10 is installed and available in the PATH.")
   }
-  
-  # Use the specified Python executable
-  use_python(python_path, required = TRUE)
-
+  #use_python(python_path, required = TRUE)
   virtualenv_dir <- "r-reticulate-env"
   
   if (!virtualenv_exists(virtualenv_dir)) {
