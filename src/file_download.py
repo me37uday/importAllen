@@ -39,6 +39,7 @@ cluster_colors.sort_values(['supercluster', 'cluster', 'subcluster'], inplace=Tr
 cluster_colors
 
 roi = abc_cache.get_metadata_dataframe(directory='WHB-10Xv3', file_name='region_of_interest_structure_map')
+print(roi)
 roi.set_index('region_of_interest_label', inplace=True)
 roi.rename(columns={'color_hex_triplet': 'region_of_interest_color'},
            inplace=True)

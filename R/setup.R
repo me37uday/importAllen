@@ -24,4 +24,6 @@ setup_environment <- function() {
   }
   
   use_virtualenv(virtualenv_dir, required = TRUE)
+
+  print("Finished setting up Python environment")
 }

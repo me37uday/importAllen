@@ -4,11 +4,10 @@
 #' @param download_base The base directory where the data is downloaded.
 #' @return A list containing cell metadata and gene data.
 #' @export
-load_data <- function(download_base = '../../abc_download_root') {
-    library(reticulate)
 
+load_data <- function(download_base = 'abc_download_root') {
+    library(reticulate)
     setup_environment()
-    print("finished setting up environment")
     # Convert the R path to a Python path
     py_download_base <- import("pathlib")$Path(download_base)
 
@@ -19,18 +18,16 @@ load_data <- function(download_base = '../../abc_download_root') {
     get_gene_data <- import("abc_atlas_access.abc_atlas_cache.anndata_utils")$get_gene_data
     py <- import_builtins()
 
-    print("finished importing")
+    print("Finished Python importing")
 
     # Create the cache object
     abc_cache <- AbcProjectCache$from_s3_cache(py_download_base)
 
-    print("finished creating cache")
+    print("Finished creating cache")
 
     # Load the cell metadata
     cell <- abc_cache$get_metadata_dataframe(directory = 'WHB-10Xv3', file_name = 'cell_metadata', dtype = dict(cell_label = 'str'))
-
-    print("finished loading cell metadata")
-    # Set the index of the cell data frame
+    print("Finished loading cell metadata")
     rownames(cell) <- cell$cell_label
     cell$cell_label <- NULL
     cat("Number of cells = ", nrow(cell), "\n")
@@ -70,16 +67,28 @@ load_data <- function(download_base = '../../abc_download_root') {
     cluster_colors <- cluster_colors[, term_sets$name] # order columns
     cluster_colors <- cluster_colors[order(cluster_colors$supercluster, cluster_colors$cluster, cluster_colors$subcluster), ]
     roi <- abc_cache$get_metadata_dataframe(directory='WHB-10Xv3', file_name='region_of_interest_structure_map')
-    #ERROR IS HERE
+    cat("Structure of roi:\n")
+    str(roi)
+    roi$region_of_interest_label <- make.unique(as.character(roi$region_of_interest_label))
     rownames(roi) <- roi$region_of_interest_label
     roi <- roi[, c('region_of_interest_color' = 'color_hex_triplet')]
-
+    print("Finished loading cluster metadata")
     # Remove unnecessary objects
     rm(membership, term_sets)
 
+    print("Structure of cell:") 
+    str(cell)
+
+    cat("Columns in cluster_details:\n")
+    print(colnames(cluster_details))
+
     # Combine data
     cell_extended <- merge(cell, cluster_details, by.x = 'cluster_alias', by.y = 'cluster_alias', all.x = TRUE)
+    cat("Columns in cluster_colors:\n")
+    print(colnames(cluster_colors))
     cell_extended <- merge(cell_extended, cluster_colors, by.x = 'cluster_alias', by.y = 'cluster_alias', suffixes = c("", "_color"), all.x = TRUE)
+    cat("Columns in roi:\n")
+    print(colnames(roi))
     cell_extended <- merge(cell_extended, roi['region_of_interest_color'], by.x = 'region_of_interest_label', by.y = 'region_of_interest_label', all.x = TRUE)
 
     # Remove unnecessary objects

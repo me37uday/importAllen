@@ -4,7 +4,7 @@
 \alias{load_data}
 \title{Load ABC Atlas data}
 \usage{
-load_data(download_base = "../../abc_download_root")
+load_data(download_base = "abc_download_root")
 }
 \arguments{
 \item{download_base}{The base directory where the data is downloaded.}
