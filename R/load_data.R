@@ -1,4 +1,4 @@
-#' Load ABC Atlas data
+tended#' Load ABC Atlas data
 #'
 #' This function loads the ABC Atlas data from the specified download base directory.
 #' @param download_base The base directory where the data is downloaded.
@@ -126,7 +126,7 @@ load_data <- function(download_base = 'abc_download_root') {
     # extracting interesting columns and unique values in them from which the gene count matrix can be asked for from fetchdata() 
                                 
     cols_of_interest <- c("feature_matrix_label", "brain_section_label", "region_of_interest_label", "anatomical_division_label", "subcluster", "cluster", "supercluster", "neurotransmitter")
-    unique_values_list <- lapply(cell_metadata[cols_of_interest], unique)
+    unique_values_list <- lapply(cell_extended[cols_of_interest], unique)
 
     return (list(cell_metadata = cell_extended, gene_data = gene, unique_values = unique_values_list))
                                 
