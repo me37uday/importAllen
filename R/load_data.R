@@ -1,4 +1,4 @@
-tended#' Load ABC Atlas data
+#' Load ABC Atlas data
 #'
 #' This function loads the ABC Atlas data from the specified download base directory.
 #' @param download_base The base directory where the data is downloaded.
