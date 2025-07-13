@@ -123,5 +123,10 @@ load_data <- function(download_base = 'abc_download_root') {
     cat("Number of genes = ", nrow(gene), "\n")
     head(gene, 5)
 
-    return (list(cell_metadata = cell_extended, gene_data = gene))
+    # extracting interesting columns and unique values in them from which the gene count matrix can be asked for from fetchdata() 
+                                
+    cols_of_interest <- c("feature_matrix_label", "brain_section_label", "region_of_interest_label", "anatomical_division_label", "subcluster", "cluster", "supercluster", "neurotransmitter")
+    unique_values_list <- lapply(cell_metadata[cols_of_interest], unique)
+
+    return (unique_values_list)
 }
