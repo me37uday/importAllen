@@ -32,8 +32,8 @@ load_data <- function(download_base = 'abc_download_root') {
     # Load the cell metadata
     cell <- abc_cache$get_metadata_dataframe(directory = 'WHB-10Xv3', file_name = 'cell_metadata', dtype = dict(cell_label = 'str'))
     print("Finished loading cell metadata")
-    rownames(cell) <- cell$cell_label
-    cell$cell_label <- NULL
+#    rownames(cell) <- cell$cell_label
+#    cell$cell_label <- NULL
     cat("Number of cells = ", nrow(cell), "\n")
 
     # Load the cluster membership metadata and combine the data with the cell data.
