@@ -6,8 +6,12 @@
 #' @export
 
 load_data <- function(download_base = 'abc_download_root') {
+    
     library(reticulate)
+    library(dplyr)
+    
     setup_environment()
+    
     # Convert the R path to a Python path
     py_download_base <- import("pathlib")$Path(download_base)
 
@@ -66,12 +70,17 @@ load_data <- function(download_base = 'abc_download_root') {
     colnames(cluster_colors) <- gsub("color_hex_triplet.", "", colnames(cluster_colors))
     cluster_colors <- cluster_colors[, term_sets$name] # order columns
     cluster_colors <- cluster_colors[order(cluster_colors$supercluster, cluster_colors$cluster, cluster_colors$subcluster), ]
+    
     roi <- abc_cache$get_metadata_dataframe(directory='WHB-10Xv3', file_name='region_of_interest_structure_map')
     cat("Structure of roi:\n")
     str(roi)
     roi$region_of_interest_label <- make.unique(as.character(roi$region_of_interest_label))
     rownames(roi) <- roi$region_of_interest_label
-    roi <- roi[, c('region_of_interest_color' = 'color_hex_triplet')]
+    
+#    roi <- roi[, c('region_of_interest_color' = 'color_hex_triplet')] this way of renaming column was retaining only that specific column leading to errors downstream 
+
+    colnames(roi)[colnames(roi) == 'color_hex_triplet'] <- 'region_of_interest_color' # corrected
+                                
     print("Finished loading cluster metadata")
     # Remove unnecessary objects
     rm(membership, term_sets)
@@ -83,16 +92,27 @@ load_data <- function(download_base = 'abc_download_root') {
     print(colnames(cluster_details))
 
     # Combine data
-    cell_extended <- merge(cell, cluster_details, by.x = 'cluster_alias', by.y = 'cluster_alias', all.x = TRUE)
-    cat("Columns in cluster_colors:\n")
-    print(colnames(cluster_colors))
-    cell_extended <- merge(cell_extended, cluster_colors, by.x = 'cluster_alias', by.y = 'cluster_alias', suffixes = c("", "_color"), all.x = TRUE)
-    cat("Columns in roi:\n")
-    print(colnames(roi))
-    cell_extended <- merge(cell_extended, roi['region_of_interest_color'], by.x = 'region_of_interest_label', by.y = 'region_of_interest_label', all.x = TRUE)
+#    cell_extended <- merge(cell, cluster_details, by.x = 'cluster_alias', by.y = 'cluster_alias', all.x = TRUE)
+#    cat("Columns in cluster_colors:\n")
+#    print(colnames(cluster_colors))
+#    cell_extended <- merge(cell_extended, cluster_colors, by.x = 'cluster_alias', by.y = 'cluster_alias', suffixes = c("", "_color"), all.x = TRUE)
+#    cat("Columns in roi:\n")
+#    print(colnames(roi))
+#    cell_extended <- merge(cell_extended, roi['region_of_interest_color'], by.x = 'region_of_interest_label', by.y = 'region_of_interest_label', all.x = TRUE)
 
+    # Ensure cluster_alias is a proper column
+    cluster_details$cluster_alias <- rownames(cluster_details)
+    cluster_colors$cluster_alias <- rownames(cluster_colors)
+    
+    cell$cluster_alias <- as.character(cell$cluster_alias)
+    
+    cell_extended <- cell %>%
+    left_join(cluster_details, by = "cluster_alias") %>%
+    left_join(cluster_colors, by = "cluster_alias", suffix = c("", "_color")) %>%
+    left_join(select(roi, region_of_interest_label, region_of_interest_color), by = "region_of_interest_label")    
+                                
     # Remove unnecessary objects
-    rm(cluster_details, cluster_colors, roi)
+#    rm(cluster_details, cluster_colors, roi)
 
     head(cell_extended, 5)
 
