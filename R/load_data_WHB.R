@@ -1,6 +1,6 @@
-#' Load ABC Atlas data
+#' Load ABC Atlas WHB data
 #'
-#' This function loads the ABC Atlas data from the specified download base directory.
+#' This function loads the ABC Atlas WHB data from the specified download base directory.
 #' @param download_base The base directory where the data is downloaded.
 #' @return A list containing cell metadata and gene data.
 #' @export
