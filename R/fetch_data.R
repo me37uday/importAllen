@@ -36,15 +36,14 @@ fetch_data <- function(download_base = 'abc_download_root', metadata, filters = 
   }
 
   # Extract cell IDs
-  cell_ids <- filtered_meta$cell_label
+  rownames(filtered_metadata) <- filtered_meta$cell_label
+  head(filtered_metadata)
 
-  head(cell_ids, 10)
   
   # Fetch expression matrix 
-
   gene_count_matrix <- get_gene_data(
   abc_atlas_cache = abc_cache,
-  all_cells = cell_ids,
+  all_cells = filtered_metadata,
   all_genes = gene_data,
   selected_genes = genes,
   data_type = "raw"
