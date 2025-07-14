@@ -11,9 +11,9 @@ fetch_data <- function(metadata, filters = list(), genes = NULL, assay_name = "R
   requireNamespace("reticulate")
   requireNamespace("Seurat")
 
-  # Load abc_atlas_access module
-  abc <- reticulate::import("abc_atlas_access", delay_load = TRUE)
-  
+  # Load get_gene_data from the correct module
+  get_gene_data <- reticulate::import("abc_atlas_access.abc_atlas_cache.anndata_utils")$get_gene_data
+
   # Apply filtering
   filtered_meta <- metadata
   for (filter_col in names(filters)) {
@@ -30,22 +30,23 @@ fetch_data <- function(metadata, filters = list(), genes = NULL, assay_name = "R
 
   # Extract cell IDs
   cell_ids <- filtered_meta$cell_label
-  
+
   # Fetch expression matrix (as AnnData)
-  adata <- abc$get_gene_data(cell_ids = cell_ids, genes = genes)
-  
+  gene_count_matrix <- get_gene_data(cell_ids = cell_ids, gene_names = genes, data_type = "raw")
+
+  gene_count_matrix <- as.data.frame(
+  lapply(gene_count_matrix, function(x) as.numeric(unlist(x)))
+  )
+
+  gene_count_matrix <- t(gene_count_matrix)
+    
   # Convert AnnData to Seurat object
   seurat_obj <- Seurat::CreateSeuratObject(
-    counts = as.sparse(adata$X),
+    counts = gene_count_matrix,
     assay = assay_name,
-    meta.data = as.data.frame(reticulate::py_to_r(adata$obs))
+    meta.data = filtered_meta)
   )
-  
-  # Optionally store gene metadata
-  gene_meta <- as.data.frame(reticulate::py_to_r(adata$var))
-  if (!is.null(gene_meta)) {
-    Seurat::VariableFeatures(seurat_obj) <- rownames(seurat_obj)[rownames(seurat_obj) %in% rownames(gene_meta)]
-  }
 
+  
   return(seurat_obj)
 }
