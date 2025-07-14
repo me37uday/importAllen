@@ -12,6 +12,7 @@ fetch_data <- function(metadata, filters = list(), genes = NULL, assay_name = "R
   requireNamespace("Seurat")
 
   # Create the cache object
+  AbcProjectCache <- import("abc_atlas_access.abc_atlas_cache.abc_project_cache")$AbcProjectCache
   abc_cache <- AbcProjectCache$from_s3_cache(py_download_base)
 
   # Load get_gene_data from the correct module
