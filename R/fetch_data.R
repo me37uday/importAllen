@@ -64,27 +64,27 @@ fetch_data <- function(download_base = 'abc_download_root',
   print(dim(gene_count_matrix))
   print(nrow(filtered_meta))
 
-# Save cell names
-cell_names <- rownames(gene_count_matrix)
+  # Save cell names
+  cell_names <- rownames(gene_count_matrix)
 
-# Ensure numeric conversion
-gene_count_matrix <- as.data.frame(
-  lapply(gene_count_matrix, function(x) as.numeric(unlist(x)))
-)
-
-# Restore row names before transpose
-rownames(gene_count_matrix) <- cell_names
-
-# Transpose to get genes as rows, cells as columns
-gene_count_matrix <- t(gene_count_matrix)
-  
-# Create Seurat object
-seurat_obj <- Seurat::CreateSeuratObject(
-  counts = gene_count_matrix,
-  assay = assay_name,
-  meta.data = filtered_meta
+  # Ensure numeric conversion
+  gene_count_matrix <- as.data.frame(
+    lapply(gene_count_matrix, function(x) as.numeric(unlist(x)))
   )
 
-return(seurat_obj)
+  # Restore row names before transpose
+  rownames(gene_count_matrix) <- cell_names
+
+  # Transpose to get genes as rows, cells as columns
+  gene_count_matrix <- t(gene_count_matrix)
+  
+  # Create Seurat object
+  seurat_obj <- Seurat::CreateSeuratObject(
+    counts = gene_count_matrix,
+    assay = assay_name,
+    meta.data = filtered_meta
+    )
+
+  return(seurat_obj)
 }
 
