@@ -38,6 +38,8 @@ fetch_data <- function(download_base = 'abc_download_root', metadata, filters = 
   # Extract cell IDs
   cell_ids <- filtered_meta$cell_label
 
+  head(cell_ids, 10)
+  
   # Fetch expression matrix 
 
   gene_count_matrix <- get_gene_data(
