@@ -30,7 +30,7 @@ load_data <- function(download_base = 'abc_download_root') {
     print("Finished creating cache")
 
     # Load the cell metadata
-    cell <- abc_cache$get_metadata_dataframe(directory = 'WHB-10Xv3', file_name = 'cell_metadata', dtype = dict(cell_label = 'str'))
+    cell <- abc_cache$get_metadata_dataframe(directory = 'WMB-10X', file_name = 'cell_metadata', dtype = dict(cell_label = 'str'))
     print("Finished loading cell metadata")
 #    rownames(cell) <- cell$cell_label
 #    cell$cell_label <- NULL
@@ -38,11 +38,11 @@ load_data <- function(download_base = 'abc_download_root') {
 
     # Load the cluster membership metadata and combine the data with the cell data.
     membership <- abc_cache$get_metadata_dataframe(
-    directory='WHB-taxonomy',
+    directory='WMB-taxonomy',
     file_name='cluster_to_cluster_annotation_membership'
     )
 
-    term_sets <- abc_cache$get_metadata_dataframe(directory='WHB-taxonomy', file_name='cluster_annotation_term_set')
+    term_sets <- abc_cache$get_metadata_dataframe(directory='WMB-taxonomy', file_name='cluster_annotation_term_set')
     
     rownames(term_sets) <- term_sets$label
 
@@ -71,7 +71,7 @@ load_data <- function(download_base = 'abc_download_root') {
     cluster_colors <- cluster_colors[, term_sets$name] # order columns
     cluster_colors <- cluster_colors[order(cluster_colors$supercluster, cluster_colors$cluster, cluster_colors$subcluster), ]
     
-    roi <- abc_cache$get_metadata_dataframe(directory='WHB-10Xv3', file_name='region_of_interest_structure_map')
+    roi <- abc_cache$get_metadata_dataframe(directory='WMB-10X', file_name='region_of_interest_structure_map')
     cat("Structure of roi:\n")
     str(roi)
     roi$region_of_interest_label <- make.unique(as.character(roi$region_of_interest_label))
@@ -118,7 +118,7 @@ load_data <- function(download_base = 'abc_download_root') {
 
     # Gene data
 
-    gene <- abc_cache$get_metadata_dataframe(directory='WHB-10Xv3', file_name='gene')
+    gene <- abc_cache$get_metadata_dataframe(directory='WMB-10X', file_name='gene')
     rownames(gene) <- gene$gene_identifier
     cat("Number of genes = ", nrow(gene), "\n")
     head(gene, 5)
