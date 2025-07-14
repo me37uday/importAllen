@@ -125,7 +125,7 @@ load_data_WHB <- function(download_base = 'abc_download_root') {
 
     # extracting interesting columns and unique values in them from which the gene count matrix can be asked for from fetchdata() 
                                 
-    cols_of_interest <- c("feature_matrix_label", "brain_section_label", "region_of_interest_label", "anatomical_division_label", "subcluster", "cluster", "supercluster", "neurotransmitter")
+    cols_of_interest <- c("feature_matrix_label", "brain_section_label", "region_of_interest_label", "anatomical_division_label", "donor_sex", "subcluster", "cluster", "supercluster", "neurotransmitter")
     unique_values_list <- lapply(cell_extended[cols_of_interest], unique)
 
     return (list(cell_metadata = cell_extended, gene_data = gene, unique_values = unique_values_list))
