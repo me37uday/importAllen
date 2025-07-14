@@ -57,7 +57,13 @@ load_data_WMB <- function(download_base = 'abc_download_root') {
     cluster_details[is.na(cluster_details)] <- 'Other'
 
     # Sort values
-    cluster_details <- cluster_details[order(cluster_details$supercluster, cluster_details$cluster, cluster_details$subcluster), ]
+    # Determine which columns are available for sorting
+    sort_cols <- intersect(c("supercluster", "cluster", "subcluster", "supertype", "subclass", "class", "neurotransmitter"), colnames(cluster_details))
+
+    # Sort only by available columns, if any
+    if (length(sort_cols) > 0) {
+      cluster_details <- dplyr::arrange(cluster_details, across(all_of(sort_cols)))
+    }
 
     cluster_colors <- aggregate(color_hex_triplet ~ cluster_alias + cluster_annotation_term_set_name, 
                                 data = membership, FUN = function(x) x[1])
@@ -69,7 +75,12 @@ load_data_WMB <- function(download_base = 'abc_download_root') {
     
     colnames(cluster_colors) <- gsub("color_hex_triplet.", "", colnames(cluster_colors))
     cluster_colors <- cluster_colors[, term_sets$name] # order columns
-    cluster_colors <- cluster_colors[order(cluster_colors$supercluster, cluster_colors$cluster, cluster_colors$subcluster), ]
+
+    sort_cols <- intersect(c("supercluster", "cluster", "subcluster", "supertype", "subclass", "class", "neurotransmitter"), colnames(cluster_colors))
+
+    if (length(sort_cols) > 0) {
+        cluster_colors <- dplyr::arrange(cluster_colors, across(all_of(sort_cols)))
+    }
     
     roi <- abc_cache$get_metadata_dataframe(directory='WMB-10X', file_name='region_of_interest_structure_map')
     cat("Structure of roi:\n")
