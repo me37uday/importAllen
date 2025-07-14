@@ -2,26 +2,32 @@
 #'
 #' @param metadata A data.frame containing ABC atlas cell metadata (e.g., from `get_cell_metadata()`).
 #' @param filters A named list of column = value pairs used to filter the metadata.
-#' @param genes A character vector of gene names to include. If NULL, all genes will be returned.
+#' @param gene_data A data.frame with a 'gene_symbol' column, typically from `load_data()`.
+#' @param genes A character vector of gene names to include. If NULL, all genes in gene_data$gene_symbol will be used.
 #' @param assay_name The name to use for the Seurat assay (default: "RNA").
 #' @return A Seurat object containing the filtered cells and gene expression data.
 #' @export
-fetch_data <- function(download_base = 'abc_download_root', metadata, filters = list(), genes = NULL, assay_name = "RNA") {
-  # Ensure reticulate and Seurat are available
+fetch_data <- function(download_base = 'abc_download_root',
+                       metadata,
+                       filters = list(),
+                       gene_data,
+                       genes = NULL,
+                       assay_name = "RNA") {
+  # Ensure required packages are available
   requireNamespace("reticulate")
   requireNamespace("Seurat")
 
-  # Convert the R path to a Python path
-  py_download_base <- import("pathlib")$Path(download_base)
-  
+  # Convert R path to Python Path
+  py_download_base <- reticulate::import("pathlib")$Path(download_base)
+
   # Create the cache object
-  AbcProjectCache <- import("abc_atlas_access.abc_atlas_cache.abc_project_cache")$AbcProjectCache
+  AbcProjectCache <- reticulate::import("abc_atlas_access.abc_atlas_cache.abc_project_cache")$AbcProjectCache
   abc_cache <- AbcProjectCache$from_s3_cache(py_download_base)
 
-  # Load get_gene_data from the correct module
+  # Import get_gene_data function
   get_gene_data <- reticulate::import("abc_atlas_access.abc_atlas_cache.anndata_utils")$get_gene_data
 
-  # Apply filtering
+  # Apply metadata filters
   filtered_meta <- metadata
   for (filter_col in names(filters)) {
     filter_val <- filters[[filter_col]]
@@ -30,34 +36,42 @@ fetch_data <- function(download_base = 'abc_download_root', metadata, filters = 
     }
     filtered_meta <- filtered_meta[filtered_meta[[filter_col]] %in% filter_val, ]
   }
-  
+
   if (nrow(filtered_meta) == 0) {
     stop("No cells left after filtering. Check your filter values.")
   }
 
-  # Extract cell IDs
+  # Extract and name cell IDs
   rownames(filtered_meta) <- filtered_meta$cell_label
-  head(filtered_meta)
 
-  
-  # Fetch expression matrix 
+  # Resolve selected genes
+  if (is.null(genes)) {
+    if (!"gene_symbol" %in% colnames(gene_data)) {
+      stop("'gene_symbol' column not found in gene_data.")
+    }
+    genes <- gene_data$gene_symbol
+  }
+
+  # Fetch gene expression data
   gene_count_matrix <- get_gene_data(
-  abc_atlas_cache = abc_cache,
-  all_cells = filtered_meta,
-  all_genes = gene_data,
-  selected_genes = genes,
-  data_type = "raw"
+    abc_atlas_cache = abc_cache,
+    all_cells = filtered_meta,
+    all_genes = gene_data,
+    selected_genes = genes,
+    data_type = "raw"
   )
 
   print(dim(gene_count_matrix))
   print(nrow(filtered_meta))
-  
+
+  # Ensure matrix is numeric
   gene_count_matrix <- as.data.frame(
-  lapply(gene_count_matrix, function(x) as.numeric(unlist(x)))
+    lapply(gene_count_matrix, function(x) as.numeric(unlist(x)))
   )
 
+  # Transpose to make rows = genes, cols = cells
   gene_count_matrix <- t(gene_count_matrix)
-    
+
   # Create Seurat object
   seurat_obj <- Seurat::CreateSeuratObject(
     counts = gene_count_matrix,
@@ -65,6 +79,6 @@ fetch_data <- function(download_base = 'abc_download_root', metadata, filters = 
     meta.data = filtered_meta
   )
 
-  
   return(seurat_obj)
 }
+
