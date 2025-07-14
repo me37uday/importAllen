@@ -49,7 +49,9 @@ fetch_data <- function(download_base = 'abc_download_root', metadata, filters = 
   data_type = "raw"
   )
 
-
+  print(dim(gene_count_matrix))
+  print(nrow(filtered_meta))
+  
   gene_count_matrix <- as.data.frame(
   lapply(gene_count_matrix, function(x) as.numeric(unlist(x)))
   )
