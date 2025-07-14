@@ -43,7 +43,6 @@ fetch_data <- function(download_base = 'abc_download_root', metadata, filters = 
   gene_count_matrix <- get_gene_data(
   abc_atlas_cache = abc_cache,
   all_cells = cell_ids,
-  all_genes = gene_data,
   selected_genes = genes,
   data_type = "raw"
   )
