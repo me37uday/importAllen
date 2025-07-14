@@ -82,16 +82,7 @@ load_data_WMB <- function(download_base = 'abc_download_root') {
         cluster_colors <- dplyr::arrange(cluster_colors, across(all_of(sort_cols)))
     }
     
-    roi <- abc_cache$get_metadata_dataframe(directory='WMB-10X', file_name='region_of_interest_structure_map')
-    cat("Structure of roi:\n")
-    str(roi)
-    roi$region_of_interest_label <- make.unique(as.character(roi$region_of_interest_label))
-    rownames(roi) <- roi$region_of_interest_label
-    
-#    roi <- roi[, c('region_of_interest_color' = 'color_hex_triplet')] this way of renaming column was retaining only that specific column leading to errors downstream 
-
-    colnames(roi)[colnames(roi) == 'color_hex_triplet'] <- 'region_of_interest_color' # corrected
-                                
+                                    
     print("Finished loading cluster metadata")
     # Remove unnecessary objects
     rm(membership, term_sets)
@@ -119,8 +110,7 @@ load_data_WMB <- function(download_base = 'abc_download_root') {
     
     cell_extended <- cell %>%
     left_join(cluster_details, by = "cluster_alias") %>%
-    left_join(cluster_colors, by = "cluster_alias", suffix = c("", "_color")) %>%
-    left_join(select(roi, region_of_interest_label, region_of_interest_color), by = "region_of_interest_label")    
+    left_join(cluster_colors, by = "cluster_alias", suffix = c("", "_color")) 
                                 
     # Remove unnecessary objects
 #    rm(cluster_details, cluster_colors, roi)
