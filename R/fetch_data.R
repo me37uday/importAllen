@@ -61,9 +61,6 @@ fetch_data <- function(download_base = 'abc_download_root',
     data_type = "raw"
   )
 
-  print(dim(gene_count_matrix))
-  print(nrow(filtered_meta))
-
   # Save cell names
   cell_names <- rownames(gene_count_matrix)
 
