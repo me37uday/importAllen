@@ -40,11 +40,11 @@ fetch_data <- function(metadata, filters = list(), genes = NULL, assay_name = "R
 
   gene_count_matrix <- t(gene_count_matrix)
     
-  # Convert AnnData to Seurat object
+  # Create Seurat object
   seurat_obj <- Seurat::CreateSeuratObject(
     counts = gene_count_matrix,
     assay = assay_name,
-    meta.data = filtered_meta)
+    meta.data = filtered_meta
   )
 
   
