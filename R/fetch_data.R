@@ -6,11 +6,14 @@
 #' @param assay_name The name to use for the Seurat assay (default: "RNA").
 #' @return A Seurat object containing the filtered cells and gene expression data.
 #' @export
-fetch_data <- function(metadata, filters = list(), genes = NULL, assay_name = "RNA") {
+fetch_data <- function(download_base = 'abc_download_root', metadata, filters = list(), genes = NULL, assay_name = "RNA") {
   # Ensure reticulate and Seurat are available
   requireNamespace("reticulate")
   requireNamespace("Seurat")
 
+  # Convert the R path to a Python path
+  py_download_base <- import("pathlib")$Path(download_base)
+  
   # Create the cache object
   AbcProjectCache <- import("abc_atlas_access.abc_atlas_cache.abc_project_cache")$AbcProjectCache
   abc_cache <- AbcProjectCache$from_s3_cache(py_download_base)
