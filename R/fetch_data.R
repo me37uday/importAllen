@@ -11,6 +11,9 @@ fetch_data <- function(metadata, filters = list(), genes = NULL, assay_name = "R
   requireNamespace("reticulate")
   requireNamespace("Seurat")
 
+  # Create the cache object
+  abc_cache <- AbcProjectCache$from_s3_cache(py_download_base)
+
   # Load get_gene_data from the correct module
   get_gene_data <- reticulate::import("abc_atlas_access.abc_atlas_cache.anndata_utils")$get_gene_data
 
@@ -31,8 +34,16 @@ fetch_data <- function(metadata, filters = list(), genes = NULL, assay_name = "R
   # Extract cell IDs
   cell_ids <- filtered_meta$cell_label
 
-  # Fetch expression matrix (as AnnData)
-  gene_count_matrix <- get_gene_data(cell_ids = cell_ids, gene_names = genes, data_type = "raw")
+  # Fetch expression matrix 
+
+  gene_count_matrix <- get_gene_data(
+  abc_atlas_cache = abc_cache,
+  all_cells = cell_ids,
+  all_genes = gene_data,
+  selected_genes = genes,
+  data_type = "raw"
+  )
+
 
   gene_count_matrix <- as.data.frame(
   lapply(gene_count_matrix, function(x) as.numeric(unlist(x)))
