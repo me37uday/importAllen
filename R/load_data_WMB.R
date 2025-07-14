@@ -5,7 +5,7 @@
 #' @return A list containing cell metadata and gene data.
 #' @export
 
-load_data <- function(download_base = 'abc_download_root') {
+load_data_WMB <- function(download_base = 'abc_download_root') {
     
     library(reticulate)
     library(dplyr)
