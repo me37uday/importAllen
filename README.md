@@ -33,6 +33,8 @@ This package is currently **under active development**. Several core functions a
 - ✅ Filtering metadata based on user-specified criteria  
 - ✅ Downloading and formatting gene expression data into **Seurat** objects  
 
+---
+
 ## 🚀 Usage Instructions
 
 You can extract gene expression data from the **Allen Brain Cell Atlas** adult human brain dataset (WHB) in just a few steps:
