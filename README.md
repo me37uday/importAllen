@@ -48,13 +48,73 @@ git clone https://github.com/me37uday/importABCatlas.git
 ### 🧬 Step 2: Load the Package in R
 
 ```
-#### Set the base download path where data will be stored
+# Set the base download path where data will be stored
 download_base <- "abc_download_root"
 
-#### Load required library
+# Load required library
 library(devtools)
 
-#### Load the package from your local clone
+# Load the package from your local clone
 devtools::load_all("/path/to/importABCatlas/")
 ```
+Replace "/path/to/importABCatlas/" with the actual path to your cloned repository.
 
+### 📥 Step 3: Load Metadata
+
+```
+WHB_metadata <- load_data_WHB()
+```
+This returns a list with the following:
+
+WHB_metadata$cell_metadata: metadata for all WHB cells
+
+WHB_metadata$gene_data: reference gene annotation
+
+WHB_metadata$unique_values: helper list showing column names and unique values (used for filtering)
+
+### 🧪 Step 4: Define Filtering Criteria
+Create a named vector to specify the cell populations of interest. Example:
+```
+filters <- c(
+  feature_matrix_label = "WHB-10Xv3-Nonneurons",
+  cluster = "VendV_17"
+)
+```
+You can explore valid column names and their possible values using:
+```
+WHB_metadata$unique_values
+```
+### 🧱 Step 5: Extract Seurat Object
+```
+obj <- fetch_data(
+  metadata  = WHB_metadata$cell_metadata,
+  filters   = filters,
+  gene_data = WHB_metadata$gene_data,
+  genes     = WHB_metadata$gene_data$gene_symbol
+)
+```
+This returns a Seurat object containing the filtered cell population.
+
+### 📤 Export for Other Frameworks (Optional)
+To use the data in other single-cell analysis frameworks like SingleCellExperiment, monocle3, etc., you can extract the raw counts and metadata:
+```
+counts <- obj@assays$RNA@counts
+meta   <- obj[[]]
+```
+
+### 🧱 Current Dataset Support
+Currently, the package supports the WHB (Whole Human Brain) dataset. Additional datasets are in development:
+
+🧠 Whole Mouse Brain (WMB)
+
+⏳ Aging Mouse Brain (AgingMouse)
+
+🔬 Human-Mammalian Brain Atlas (HMBA)
+
+🧬 Human Postmortem-Derived Brain Sequencing (PMDBS)
+
+All required raw files will be downloaded to the location defined by download_base.
+
+⚙️ System requirements and package dependencies are currently being tested. Detailed installation and configuration instructions will be available in the final documentation.
+
+Thank you for your patience and support as the package evolves.
