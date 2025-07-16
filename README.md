@@ -68,11 +68,9 @@ WHB_metadata <- load_data_WHB()
 ```
 This returns a list with the following:
 
-WHB_metadata$cell_metadata: metadata for all WHB cells
-
-WHB_metadata$gene_data: reference gene annotation
-
-WHB_metadata$unique_values: helper list showing column names and unique values (used for filtering)
+- WHB_metadata$cell_metadata: metadata for all WHB cells
+- WHB_metadata$gene_data: reference gene annotation
+- WHB_metadata$unique_values: helper list showing column names and unique values (used for filtering)
 
 ### 🧪 Step 4: Define Filtering Criteria
 Create a named vector to specify the cell populations of interest. Example:
@@ -107,13 +105,10 @@ meta   <- obj[[]]
 ### 🧱 Current Dataset Support
 Currently, the package supports the WHB (Whole Human Brain) dataset. Additional datasets are in development:
 
-🧠 Whole Mouse Brain (WMB)
-
-⏳ Aging Mouse Brain (AgingMouse)
-
-🔬 Human-Mammalian Brain Atlas (HMBA)
-
-🧬 Human Postmortem-Derived Brain Sequencing (PMDBS)
+- 🧠 Whole Mouse Brain (WMB)
+- ⏳ Aging Mouse Brain (AgingMouse)
+- 🔬 Human-Mammalian Brain Atlas (HMBA)
+- 🧬 Human Postmortem-Derived Brain Sequencing (PMDBS)
 
 All required raw files will be downloaded to the location defined by download_base.
 
