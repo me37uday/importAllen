@@ -33,8 +33,17 @@ This package is currently **under active development**. Several core functions a
 - ✅ Filtering metadata based on user-specified criteria  
 - ✅ Downloading and formatting gene expression data into **Seurat** objects  
 
-More comprehensive documentation will be added as development progresses. However, the current version is already usable and allows you to extract a **cell × gene** count matrix for selected populations from the **adult human brain dataset** of the ABC Atlas.
+## 🚀 Usage Instructions
+
+You can extract gene expression data from the **Allen Brain Cell Atlas** adult human brain dataset (WHB) in just a few steps:
 
 ---
 
-_Stay tuned for usage instructions and examples below!_
+### 🔧 Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/me37uday/importABCatlas.git
+```
+
+### 🧬 Step 2: Load the Package in R
+
