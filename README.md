@@ -47,11 +47,11 @@ git clone https://github.com/me37uday/importABCatlas.git
 
 ### 🧬 Step 2: Load the Package in R
 
-# Set the base download path where data will be stored
+#### Set the base download path where data will be stored
 download_base <- "abc_download_root"
 
-# Load required library
+#### Load required library
 library(devtools)
 
-# Load the package from your local clone
+#### Load the package from your local clone
 devtools::load_all("/path/to/importABCatlas/")
